@@ -16,6 +16,22 @@ body {
 }
 
 .wrapper {
+  display: flex;
+  flex-direction: column;
+}
+
+.title {
+  text-align: center;
+  font-size: 32px;
+  font-weight: 800;
+  letter-spacing: 8px;
+  color: #7aa2f7;
+  text-shadow: 0 0 16px rgba(122, 162, 247, 0.5);
+  margin-bottom: 16px;
+}
+
+/* Acota el overlay al tablero y al panel, sin cubrir el título */
+.game-area {
   position: relative;
 }
 
