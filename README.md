@@ -87,6 +87,12 @@ Después abre `http://localhost:8000` en el navegador.
 | `Espacio` | Hard drop (caída instantánea)     |
 | `P`       | Pausar / reanudar                 |
 
+### Tema claro / oscuro
+
+El botón de la esquina superior izquierda alterna entre **modo oscuro** (por defecto) y **modo claro**. La elección no se guarda: cada vez que se abre el juego empieza en oscuro. Los colores de las piezas no cambian entre temas.
+
+Los colores del tema están definidos como variables CSS en `style.css` (`:root` para el oscuro y `:root[data-theme="light"]` para el claro); `game.js` lee `--grid` y `--block-shine` para dibujar la cuadrícula y el brillo de los bloques en el canvas.
+
 ---
 
 ## Cómo funciona
