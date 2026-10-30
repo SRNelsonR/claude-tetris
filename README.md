@@ -25,6 +25,7 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
   - [Tecnologías](#tecnologías)
   - [Estructura del proyecto](#estructura-del-proyecto)
   - [Personalización](#personalización)
+  - [Triage automático de issues](#triage-automático-de-issues)
   - [Licencia](#licencia)
 
 ---
@@ -159,6 +160,7 @@ Cuando una pieza recién generada ya colisiona al aparecer (`spawn`), se dispara
 ├── index.html      # Estructura del DOM y canvas
 ├── style.css       # Estilos del juego (dark theme)
 ├── game.js         # Toda la lógica del Tetris (~300 líneas)
+├── .github/workflows/  # Claude: asistente, code review y triage de issues
 └── README.md
 ```
 
@@ -178,6 +180,15 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
 
 > Si cambias `COLS`, `ROWS` o `BLOCK`, recuerda ajustar también `width` y `height` del `<canvas id="board">` en `index.html` para que coincida (`COLS × BLOCK` × `ROWS × BLOCK`).
+
+---
+
+## Triage automático de issues
+
+El workflow `.github/workflows/claude-issue-triage.yml` analiza con Claude cada issue nuevo y cada vez que se edita su título o cuerpo. Usa el secreto `CLAUDE_CODE_OAUTH_TOKEN` del repositorio y hace dos cosas:
+
+- **Asigna labels**: un tipo (`bug`, `enhancement`, `documentation`, `question`), una o más áreas (`area:gameplay`, `area:ui`, `area:controles`, `area:ci`) y una prioridad (`prioridad:alta`, `prioridad:media`, `prioridad:baja`).
+- **Publica un diagnóstico general** en un único comentario (marcado con `<!-- claude-issue-triage -->`) que se actualiza en cada re-análisis: resumen, archivos implicados, causa probable, propuesta de solución y criterios de aceptación.
 
 ---
 
