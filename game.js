@@ -264,6 +264,9 @@ function loop(ts) {
     }
   }
   draw();
+  // endGame() puede ejecutarse dentro de este frame (vía lockPiece), donde
+  // cancelAnimationFrame(animId) no tiene efecto: no reprogramar el bucle.
+  if (gameOver) return;
   animId = requestAnimationFrame(loop);
 }
 
