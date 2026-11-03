@@ -395,6 +395,8 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  // Si el select conserva el foco, soltarlo para que las flechas no cambien la skin
+  if (document.activeElement === skinSelect && e.code !== 'Tab') skinSelect.blur();
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
