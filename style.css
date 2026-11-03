@@ -41,6 +41,22 @@
   --danger: #c62828;
 }
 
+/* Skins: sobrescriben variables del tablero (van después del tema claro) */
+:root[data-skin="neon"] {
+  --board-bg: #000000;
+  --border: #1d3a4a;
+  --grid: #14141f;
+  --block-shine: transparent;
+}
+
+:root[data-skin="pastel"] {
+  --block-shine: rgba(255, 255, 255, 0.4);
+}
+
+:root[data-skin="pixel"] {
+  --grid: transparent;
+}
+
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -78,6 +94,34 @@ body {
 }
 
 #theme-toggle:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---- Selector de skin (arriba a la derecha) ---- */
+.skin-picker {
+  position: fixed;
+  top: 16px;
+  right: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg);
+}
+
+#skin-select {
+  background: var(--board-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 7px 10px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#skin-select:focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
