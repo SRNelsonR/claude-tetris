@@ -233,3 +233,89 @@ kbd {
 #restart-btn:hover {
   background: var(--accent-hover);
 }
+
+/* ---- Menú de pausa ---- */
+#pause-title {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--accent);
+}
+
+.pause-box {
+  width: 220px;
+}
+
+.menu-btn {
+  width: 100%;
+  background: var(--board-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.menu-btn:hover,
+.menu-btn:focus-visible {
+  border-color: var(--accent);
+  outline: none;
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+#resume-btn {
+  background: var(--accent);
+  color: var(--on-accent);
+  border-color: var(--accent);
+}
+
+#controls-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  width: 100%;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+#controls-list li {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+#controls-list.hidden {
+  display: none;
+}
+
+.level-select {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--fg);
+}
+
+#start-level-select {
+  background: var(--board-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 13px;
+}
+
+#start-level-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.pause-hint {
+  font-size: 11px;
+  color: var(--muted);
+}
