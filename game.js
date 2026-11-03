@@ -42,6 +42,13 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 
+const pauseMenu = document.getElementById('pause-menu');
+const resumeBtn = document.getElementById('resume-btn');
+const pauseRestartBtn = document.getElementById('pause-restart-btn');
+const controlsBtn = document.getElementById('controls-btn');
+const controlsList = document.getElementById('controls-list');
+const startLevelSelect = document.getElementById('start-level-select');
+
 const themeToggle = document.getElementById('theme-toggle');
 
 // Colores del canvas leídos de las variables CSS del tema activo
@@ -53,7 +60,19 @@ function loadCanvasColors() {
   canvasColors.shine = css.getPropertyValue('--block-shine').trim();
 }
 
+// Nivel con el que arranca la próxima partida (se elige en el menú de pausa)
+let startLevel = 1;
+// Nivel inicial de la partida en curso (copia de startLevel al hacer init)
+let gameStartLevel = 1;
+// Instante hasta el que se ignoran las teclas de juego tras reanudar/reiniciar
+let inputBlockedUntil = 0;
+const RESUME_GRACE_MS = 150;
+
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+
+function speedFor(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -119,8 +138,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = Math.max(gameStartLevel, Math.floor(lines / 10) + 1);
+    dropInterval = speedFor(level);
     updateHUD();
   }
 }
@@ -243,13 +262,17 @@ function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    pauseMenu.classList.add('hidden');
+    if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+    inputBlockedUntil = performance.now() + RESUME_GRACE_MS;
     lastTime = performance.now();
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    controlsList.classList.add('hidden');
+    controlsBtn.setAttribute('aria-expanded', 'false');
+    pauseMenu.classList.remove('hidden');
+    resumeBtn.focus();
   }
 }
 
@@ -276,23 +299,48 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  gameStartLevel = startLevel;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = speedFor(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  pauseMenu.classList.add('hidden');
+  if (document.activeElement && document.activeElement !== document.body) document.activeElement.blur();
+  inputBlockedUntil = performance.now() + RESUME_GRACE_MS;
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
-  if (paused || gameOver) return;
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (!e.repeat) togglePause();
+    return;
+  }
+  if (paused) {
+    // Menú abierto: las teclas de juego no actúan; solo se navega por el menú
+    if (e.target === startLevelSelect) return;
+    if (e.code === 'ArrowUp' || e.code === 'ArrowDown') {
+      e.preventDefault();
+      const items = [...pauseMenu.querySelectorAll('button, select')]
+        .filter(el => el.offsetParent !== null);
+      const i = items.indexOf(document.activeElement);
+      const d = e.code === 'ArrowDown' ? 1 : -1;
+      items[i < 0 ? 0 : (i + d + items.length) % items.length].focus();
+    }
+    return;
+  }
+  if (gameOver) return;
+  // Descarta teclas pulsadas justo tras reanudar o reiniciar
+  if (performance.now() < inputBlockedUntil) {
+    if (e.code === 'Space') e.preventDefault();
+    return;
+  }
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -316,6 +364,17 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+resumeBtn.addEventListener('click', togglePause);
+pauseRestartBtn.addEventListener('click', init);
+
+controlsBtn.addEventListener('click', () => {
+  const open = !controlsList.classList.toggle('hidden');
+  controlsBtn.setAttribute('aria-expanded', String(open));
+});
+
+startLevelSelect.addEventListener('change', () => {
+  startLevel = Number(startLevelSelect.value);
+});
 
 themeToggle.addEventListener('click', () => {
   const root = document.documentElement;
