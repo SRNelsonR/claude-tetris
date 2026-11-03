@@ -4,17 +4,123 @@ const COLS = 10;
 const ROWS = 20;
 const BLOCK = 30;
 
-const COLORS = [
-  null,
-  '#4dd0e1', // I - cyan
-  '#ffd54f', // O - yellow
-  '#ba68c8', // T - purple
-  '#81c784', // S - green
-  '#e57373', // Z - red
-  '#90caf9', // J - pale blue
-  '#ffb74d', // L - orange
-  '#b0bec5', // N - tuerca (gris acero)
-];
+// Cada skin define su paleta (índice 1–8 = tipo de pieza) y su función de dibujo.
+// draw(context, px, py, size, color): px/py = esquina superior izquierda de la celda en píxeles.
+const SKINS = {
+  retro: {
+    name: 'Retro',
+    colors: [
+      null,
+      '#4dd0e1', // I - cyan
+      '#ffd54f', // O - yellow
+      '#ba68c8', // T - purple
+      '#81c784', // S - green
+      '#e57373', // Z - red
+      '#90caf9', // J - pale blue
+      '#ffb74d', // L - orange
+      '#b0bec5', // N - tuerca (gris acero)
+    ],
+    draw(context, px, py, size, color) {
+      context.fillStyle = color;
+      context.fillRect(px + 1, py + 1, size - 2, size - 2);
+      // highlight
+      context.fillStyle = canvasColors.shine;
+      context.fillRect(px + 1, py + 1, size - 2, Math.max(2, size / 7.5));
+    },
+  },
+  neon: {
+    name: 'Neon',
+    colors: [
+      null,
+      '#00f5ff', // I
+      '#fff700', // O
+      '#d500f9', // T
+      '#39ff14', // S
+      '#ff1744', // Z
+      '#2979ff', // J
+      '#ff9100', // L
+      '#e0e0ff', // N - tuerca
+    ],
+    draw(context, px, py, size, color) {
+      const m = Math.max(2, size / 7.5);
+      const w = size - 2 * m;
+      context.save();
+      context.shadowColor = color;
+      context.shadowBlur = size * 0.5;
+      context.strokeStyle = color;
+      context.lineWidth = 2;
+      context.strokeRect(px + m, py + m, w, w);
+      context.shadowBlur = 0;
+      context.globalAlpha *= 0.3;
+      context.fillStyle = color;
+      context.fillRect(px + m, py + m, w, w);
+      context.restore();
+    },
+  },
+  pastel: {
+    name: 'Pastel',
+    colors: [
+      null,
+      '#a8e6ef', // I
+      '#fff1b8', // O
+      '#d9b8f0', // T
+      '#b8e6c1', // S
+      '#f7b9b9', // Z
+      '#b8d4f7', // J
+      '#fcd5a8', // L
+      '#cfd8dc', // N - tuerca
+    ],
+    draw(context, px, py, size, color) {
+      const x = px + 1.5, y = py + 1.5, w = size - 3;
+      context.fillStyle = color;
+      context.beginPath();
+      context.roundRect(x, y, w, w, size * 0.28);
+      context.fill();
+      // brillo suave
+      context.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      context.beginPath();
+      context.roundRect(x + w * 0.15, y + w * 0.12, w * 0.7, w * 0.2, w * 0.1);
+      context.fill();
+    },
+  },
+  pixel: {
+    name: 'Pixel art',
+    colors: [
+      null,
+      '#29b6f6', // I
+      '#fdd835', // O
+      '#ab47bc', // T
+      '#66bb6a', // S
+      '#ef5350', // Z
+      '#5c6bc0', // J
+      '#ff7043', // L
+      '#90a4ae', // N - tuerca
+    ],
+    draw(context, px, py, size, color) {
+      const u = size / 6; // "píxel" del sprite: cuadrícula de 6×6 por bloque
+      context.fillStyle = color;
+      context.fillRect(px, py, size, size);
+      // sombra: borde inferior y derecho
+      context.fillStyle = 'rgba(0, 0, 0, 0.35)';
+      context.fillRect(px, py + size - u, size, u);
+      context.fillRect(px + size - u, py, u, size);
+      // luz: borde superior e izquierdo
+      context.fillStyle = 'rgba(255, 255, 255, 0.45)';
+      context.fillRect(px, py, size - u, u);
+      context.fillRect(px, py, u, size - u);
+      // textura: patrón de tablero de ajedrez en el interior
+      context.fillStyle = 'rgba(0, 0, 0, 0.14)';
+      for (let i = 1; i < 5; i++)
+        for (let j = 1; j < 5; j++)
+          if ((i + j) % 2 === 0) context.fillRect(px + i * u, py + j * u, u, u);
+    },
+  },
+};
+
+const DEFAULT_SKIN = 'retro';
+const SKIN_STORAGE_KEY = 'tetris-skin';
+let currentSkin = DEFAULT_SKIN;
+let COLORS = SKINS[DEFAULT_SKIN].colors;
 
 const PIECES = [
   null,
@@ -43,6 +149,7 @@ const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 
 const themeToggle = document.getElementById('theme-toggle');
+const skinSelect = document.getElementById('skin-select');
 
 // Colores del canvas leídos de las variables CSS del tema activo
 const canvasColors = { grid: '', shine: '' };
@@ -171,13 +278,8 @@ function updateHUD() {
 
 function drawBlock(context, x, y, colorIndex, size, alpha) {
   if (!colorIndex) return;
-  const color = COLORS[colorIndex];
   context.globalAlpha = alpha ?? 1;
-  context.fillStyle = color;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, size - 2);
-  // highlight
-  context.fillStyle = canvasColors.shine;
-  context.fillRect(x * size + 1, y * size + 1, size - 2, 4);
+  SKINS[currentSkin].draw(context, x * size, y * size, size, COLORS[colorIndex]);
   context.globalAlpha = 1;
 }
 
@@ -333,6 +435,35 @@ themeToggle.addEventListener('click', () => {
   themeToggle.blur();
 });
 
-loadCanvasColors();
+function setSkin(name) {
+  if (!SKINS[name]) name = DEFAULT_SKIN;
+  currentSkin = name;
+  COLORS = SKINS[name].colors;
+  document.documentElement.dataset.skin = name;
+  skinSelect.value = name;
+  loadCanvasColors();
+}
+
+function loadSavedSkin() {
+  try {
+    return localStorage.getItem(SKIN_STORAGE_KEY);
+  } catch (e) {
+    return null; // localStorage no disponible
+  }
+}
+
+skinSelect.addEventListener('change', () => {
+  setSkin(skinSelect.value);
+  try {
+    localStorage.setItem(SKIN_STORAGE_KEY, currentSkin);
+  } catch (e) { /* sin persistencia */ }
+  // El bucle está cancelado en pausa/game over: redibujar explícitamente
+  draw();
+  drawNext();
+  // Evita que las flechas del teclado cambien la opción del selector mientras se juega
+  skinSelect.blur();
+});
+
+setSkin(loadSavedSkin());
 
 init();
