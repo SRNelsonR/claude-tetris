@@ -82,6 +82,43 @@ body {
   outline-offset: 2px;
 }
 
+/* ---- Selector de skin (debajo del toggle de tema) ---- */
+.skin-picker {
+  position: fixed;
+  top: 60px;
+  left: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.skin-picker label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--label);
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+#skin-select {
+  background: var(--board-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+#skin-select:hover {
+  border-color: var(--accent);
+}
+
+#skin-select:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .wrapper {
   display: flex;
   flex-direction: column;

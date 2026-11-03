@@ -97,6 +97,19 @@ El botón de la esquina superior izquierda alterna entre **modo oscuro** (por de
 
 Los colores del tema están definidos como variables CSS en `style.css` (`:root` para el oscuro y `:root[data-theme="light"]` para el claro); `game.js` lee `--grid` y `--block-shine` para dibujar la cuadrícula y el brillo de los bloques en el canvas.
 
+### Skins visuales
+
+El selector **Skin**, debajo del botón de tema, cambia la apariencia del tablero y de la pieza siguiente sin recargar:
+
+| Skin          | Aspecto                                                                              |
+| ------------- | ------------------------------------------------------------------------------------ |
+| **Retro**     | Bloques cuadrados de colores planos (estilo original, respeta el tema claro/oscuro). |
+| **Neon**      | Fondo negro y colores saturados con resplandor (`shadowBlur`).                       |
+| **Pastel**    | Colores suaves y bloques con esquinas redondeadas.                                   |
+| **Pixel art** | Textura de píxeles claros/oscuros dibujada sobre cada bloque.                        |
+
+La elección se guarda en `localStorage` (clave `tetris-skin`) y se aplica al volver a abrir el juego. Cada skin está definida en el objeto `SKINS` de `game.js` con su paleta `colors`, `boardBg`, `grid` y su función `drawBlock`.
+
 ---
 
 ## Cómo funciona
@@ -185,7 +198,8 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `COLS`         | Columnas del tablero                     | `10`                  |
 | `ROWS`         | Filas del tablero                        | `20`                  |
 | `BLOCK`        | Tamaño en píxeles de cada celda          | `30`                  |
-| `COLORS`       | Paleta de colores por tipo de pieza      | 8 colores             |
+| `COLORS`       | Paleta de la skin Retro por tipo de pieza | 8 colores             |
+| `SKINS`        | Skins: paleta, fondo, cuadrícula y `drawBlock` | `retro`, `neon`, `pastel`, `pixel` |
 | `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
 | `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
 
