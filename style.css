@@ -216,11 +216,15 @@ kbd {
   color: var(--accent);
 }
 
-#restart-btn {
-  margin-top: 8px;
+.overlay-box .hidden {
+  display: none;
+}
+
+.overlay-box button {
+  min-width: 180px;
   background: var(--accent);
   color: var(--on-accent);
-  border: none;
+  border: 1px solid var(--accent);
   border-radius: 6px;
   padding: 10px 28px;
   font-size: 14px;
@@ -230,6 +234,70 @@ kbd {
   transition: background 0.15s;
 }
 
-#restart-btn:hover {
+.overlay-box button:hover {
   background: var(--accent-hover);
+}
+
+.overlay-box button:focus-visible,
+.level-select select:focus-visible {
+  outline: 2px solid var(--fg);
+  outline-offset: 2px;
+}
+
+/* Botón secundario (Ver controles) */
+.overlay-box button.secondary {
+  background: var(--board-bg);
+  color: var(--fg);
+  border-color: var(--border);
+}
+
+.overlay-box button.secondary:hover {
+  background: var(--board-bg);
+  border-color: var(--accent);
+}
+
+.pause-controls {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: flex-start;
+  padding: 10px 16px;
+  background: var(--board-bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+
+.pause-controls li {
+  font-size: 12px;
+  color: var(--muted);
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.level-select {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: var(--fg);
+}
+
+.level-select select {
+  background: var(--board-bg);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 4px 8px;
+  font-size: 13px;
+  font-family: inherit;
+}
+
+.overlay-box .hint {
+  font-size: 11px;
+  color: var(--muted);
 }

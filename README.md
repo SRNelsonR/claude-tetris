@@ -42,7 +42,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Vista previa** de la siguiente pieza.
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
-- **Pausa** y **Game Over** con opción de reinicio.
+- **Menú de pausa** (`P` o `Esc`) con Reanudar, Reiniciar, Ver controles y selector de nivel inicial, y **Game Over** con opción de reinicio.
 
 ---
 
@@ -85,7 +85,18 @@ Después abre `http://localhost:8000` en el navegador.
 | `↑` o `X` | Rotar la pieza en sentido horario |
 | `↓`       | Soft drop (bajar más rápido)      |
 | `Espacio` | Hard drop (caída instantánea)     |
-| `P`       | Pausar / reanudar                 |
+| `P` o `Esc` | Pausar / reanudar               |
+
+### Menú de pausa
+
+Al pausar aparece un menú con estas opciones:
+
+- **Reanudar**: vuelve a la partida.
+- **Reiniciar**: empieza una partida nueva sin recargar la página.
+- **Ver controles**: muestra u oculta la lista de teclas dentro del menú.
+- **Nivel inicial** (1–10): nivel con el que empezará la próxima partida (al pulsar Reiniciar o tras un Game Over). El nivel sube cada 10 líneas a partir de ese valor.
+
+Mientras el menú está abierto, las teclas de juego no hacen nada. Al reanudar o reiniciar, las teclas que sigas manteniendo pulsadas se ignoran hasta que las sueltes, para evitar movimientos accidentales.
 
 ### Tema claro / oscuro
 
@@ -122,7 +133,7 @@ Contiene toda la lógica del juego. A grandes rasgos:
 - **Game loop** (`loop`): basado en `requestAnimationFrame`, acumula el tiempo transcurrido y baja la pieza una fila cuando se supera `dropInterval`.
 - **Limpieza de líneas** (`clearLines`): recorre el tablero de abajo hacia arriba; cada fila completa se elimina y se inserta una vacía en la cima.
 - **Puntuación**: usa la tabla clásica `[0, 100, 300, 500, 800]` multiplicada por el nivel actual; el hard drop suma 2 puntos por celda recorrida y el soft drop 1 punto por fila.
-- **Nivel y velocidad**: el nivel sube cada 10 líneas; la velocidad de caída se calcula como `max(100, 1000 − (level − 1) × 90)` milisegundos.
+- **Nivel y velocidad**: el nivel es `nivel inicial + floor(líneas / 10)` (el nivel inicial se elige en el menú de pausa, por defecto 1); la velocidad de caída se calcula como `max(100, 1000 − (level − 1) × 90)` milisegundos (`speedFor`).
 - **Ghost piece** (`ghostY`): proyecta la posición final de la pieza actual hacia abajo y la dibuja con `globalAlpha = 0.2`.
 
 ### Flujo del juego
@@ -183,7 +194,8 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `BLOCK`        | Tamaño en píxeles de cada celda          | `30`                  |
 | `COLORS`       | Paleta de colores por tipo de pieza      | 8 colores             |
 | `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
-| `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
+| `dropInterval` | Velocidad inicial de caída en ms (nivel 1) | `1000`              |
+| `#start-level` | Opciones del selector de nivel inicial (`index.html`) | `1`–`10` |
 
 > Si cambias `COLS`, `ROWS` o `BLOCK`, recuerda ajustar también `width` y `height` del `<canvas id="board">` en `index.html` para que coincida (`COLS × BLOCK` × `ROWS × BLOCK`).
 
