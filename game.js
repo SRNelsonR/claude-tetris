@@ -41,6 +41,12 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const resumeBtn = document.getElementById('resume-btn');
+const controlsBtn = document.getElementById('controls-btn');
+const pauseControls = document.getElementById('pause-controls');
+const startLevelSel = document.getElementById('start-level');
+// Elementos del overlay que solo se muestran en pausa (no en game over)
+const pauseOnlyEls = document.querySelectorAll('#overlay .pause-only');
 
 const themeToggle = document.getElementById('theme-toggle');
 
@@ -54,6 +60,16 @@ function loadCanvasColors() {
 }
 
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+let startLevel = 1;
+
+// Teclas físicamente pulsadas, y las que siguen "bloqueadas" tras reanudar o
+// reiniciar: se ignoran hasta soltarlas para no mover la pieza por accidente.
+const pressedKeys = new Set();
+let blockedKeys = new Set();
+
+function speedFor(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -119,8 +135,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = startLevel + Math.floor(lines / 10);
+    dropInterval = speedFor(level);
     updateHUD();
   }
 }
@@ -231,25 +247,43 @@ function drawNext() {
       drawBlock(nextCtx, offX + c, offY + r, shape[r][c], NB);
 }
 
+function setControlsVisible(visible) {
+  pauseControls.classList.toggle('hidden', !visible);
+  controlsBtn.textContent = visible ? 'Ocultar controles' : 'Ver controles';
+  controlsBtn.setAttribute('aria-expanded', String(visible));
+}
+
+// mode: 'pause' | 'gameover'. El overlay es compartido; en game over se
+// ocultan Reanudar y Ver controles.
+function showOverlay(mode) {
+  const isPause = mode === 'pause';
+  overlayTitle.textContent = isPause ? 'PAUSA' : 'GAME OVER';
+  overlayScore.textContent = isPause ? '' : `Puntuación: ${score.toLocaleString()}`;
+  pauseOnlyEls.forEach(el => el.classList.toggle('hidden', !isPause));
+  setControlsVisible(false);
+  overlay.classList.remove('hidden');
+  if (isPause) resumeBtn.focus();
+}
+
 function endGame() {
   gameOver = true;
   cancelAnimationFrame(animId);
-  overlayTitle.textContent = 'GAME OVER';
-  overlayScore.textContent = `Puntuación: ${score.toLocaleString()}`;
-  overlay.classList.remove('hidden');
+  showOverlay('gameover');
 }
 
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
-  if (!paused) {
+  if (paused) {
+    cancelAnimationFrame(animId);
+    showOverlay('pause');
+  } else {
+    overlay.classList.add('hidden');
+    // Quita el foco del menú para que Space/Enter no activen botones en juego
+    if (document.activeElement) document.activeElement.blur();
+    blockedKeys = new Set(pressedKeys);
     lastTime = performance.now();
     loop(lastTime);
-  } else {
-    cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
   }
 }
 
@@ -276,23 +310,35 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  startLevel = Number(startLevelSel.value) || 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = speedFor(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  if (document.activeElement) document.activeElement.blur();
+  blockedKeys = new Set(pressedKeys);
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
 
 document.addEventListener('keydown', e => {
-  if (e.code === 'KeyP') { togglePause(); return; }
+  pressedKeys.add(e.code);
+  if (e.code === 'KeyP' || e.code === 'Escape') {
+    if (!e.repeat) togglePause();
+    return;
+  }
+  // Con el menú abierto o en game over, las teclas de juego no actúan
   if (paused || gameOver) return;
+  if (blockedKeys.has(e.code)) {
+    if (e.code === 'Space') e.preventDefault();
+    return;
+  }
   switch (e.code) {
     case 'ArrowLeft':
       if (!collide(current.shape, current.x - 1, current.y)) current.x--;
@@ -315,7 +361,22 @@ document.addEventListener('keydown', e => {
   updateHUD();
 });
 
+document.addEventListener('keyup', e => {
+  pressedKeys.delete(e.code);
+  blockedKeys.delete(e.code);
+});
+
+// Si la ventana pierde el foco no llegan los keyup: evita teclas "pegadas"
+window.addEventListener('blur', () => {
+  pressedKeys.clear();
+  blockedKeys.clear();
+});
+
 restartBtn.addEventListener('click', init);
+resumeBtn.addEventListener('click', togglePause);
+controlsBtn.addEventListener('click', () => {
+  setControlsVisible(pauseControls.classList.contains('hidden'));
+});
 
 themeToggle.addEventListener('click', () => {
   const root = document.documentElement;
