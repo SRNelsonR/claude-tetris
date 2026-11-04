@@ -43,6 +43,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Menú de pausa** (`P` o `Esc`) con Reanudar, Reiniciar, Ver controles y selector de nivel inicial, y **Game Over** con opción de reinicio.
+- **Pantalla de inicio** con botón _Jugar_ y **tabla de records local** (ver más abajo).
 
 ---
 
@@ -103,6 +104,15 @@ Mientras el menú está abierto, las teclas de juego no hacen nada. Al reanudar 
 El botón de la esquina superior izquierda alterna entre **modo oscuro** (por defecto) y **modo claro**. La elección no se guarda: cada vez que se abre el juego empieza en oscuro. Los colores de las piezas no cambian entre temas.
 
 Los colores del tema están definidos como variables CSS en `style.css` (`:root` para el oscuro y `:root[data-theme="light"]` para el claro); `game.js` lee `--grid` y `--block-shine` para dibujar la cuadrícula y el brillo de los bloques en el canvas.
+
+### Tabla de records
+
+Se guarda en `localStorage` (clave `tetris-records`), solo en el navegador actual:
+
+- **Top 5** de puntuaciones con nombre del jugador (máx. 12 caracteres). Al terminar la partida, si la puntuación entra en el top aparece resaltada junto a un campo de texto para escribir el nombre; si se pulsa _Reiniciar_ sin guardar, se guarda como «Anónimo».
+- Se muestra en la **pantalla de inicio** y en el overlay de **Game Over**.
+- Además se guardan el **mejor combo** (mayor número de piezas seguidas que limpian al menos una línea) y las **líneas máximas** conseguidas en una partida.
+- El botón **Resetear records** (en ambas pantallas, con confirmación) borra todo.
 
 ---
 
