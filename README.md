@@ -114,6 +114,17 @@ Se guarda en `localStorage` (clave `tetris-records`), solo en el navegador actua
 - Además se guardan el **mejor combo** (mayor número de piezas seguidas que limpian al menos una línea) y las **líneas máximas** conseguidas en una partida.
 - El botón **Resetear records** (en ambas pantallas, con confirmación) borra todo.
 
+### Skins visuales
+
+El selector **Skin** (bajo el botón de tema) cambia la apariencia de los bloques sin recargar la página:
+
+- **Retro** — bloques cuadrados con colores planos (por defecto).
+- **Neon** — fondo negro y bloques con brillo (`shadowBlur`).
+- **Pastel** — colores suaves y bordes redondeados.
+- **Pixel art** — bisel y patrón de textura dibujado sobre cada bloque.
+
+La elección se guarda en `localStorage` (clave `tetris-skin`) y se restaura al abrir el juego. Cada skin tiene su paleta en `SKIN_COLORS` y su función de dibujo en `SKIN_DRAW` (`game.js`); `applySkin(nombre)` activa una. Es independiente del tema claro/oscuro.
+
 ---
 
 ## Cómo funciona
@@ -202,7 +213,8 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `COLS`         | Columnas del tablero                     | `10`                  |
 | `ROWS`         | Filas del tablero                        | `20`                  |
 | `BLOCK`        | Tamaño en píxeles de cada celda          | `30`                  |
-| `COLORS`       | Paleta de colores por tipo de pieza      | 8 colores             |
+| `SKIN_COLORS`  | Paleta por skin y tipo de pieza          | 4 skins × 8 colores   |
+| `SKIN_DRAW`    | Función de dibujo de bloque por skin     | 4 funciones           |
 | `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
 | `dropInterval` | Velocidad inicial de caída en ms (nivel 1) | `1000`              |
 | `#start-level` | Opciones del selector de nivel inicial (`index.html`) | `1`–`10` |
